@@ -11,11 +11,11 @@ export const Home = () => {
 
 
     useEffect(() => {
-        // 1. Intentamos ver si la agenda existe
+        // 1. Comoprobar si la agenda existe
         const inicializarAgenda = async () => await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
             .then(response => {
                 if (response.status === 404) {
-                    // 2. Si NO existe (404), la CREAMOS primero
+                    // 2. Si NO existe (404), la CREAMOS
                     return fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" }
@@ -35,7 +35,7 @@ export const Home = () => {
                             });
                         });
                 }
-                // Si la agenda ya existía, simplemente pedimos los contactos
+                // Si la agenda ya existía, pedimos los contactos
                 return fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`);
             })
             .then(response => response.json())
