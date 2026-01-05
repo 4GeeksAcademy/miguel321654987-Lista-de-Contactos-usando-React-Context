@@ -1,13 +1,19 @@
- import { useState } from 'react';
+import { useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
 
 export const Formulario = () => {
+const {id} = useParams
 
   const [formData, setFormData] = useState({
-    fullName: '',
+    name: '',
     email: '',
     phone: '',
     address: '',
   });
+  const slug = "miguel321654987"
+
+  
+  
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -15,22 +21,30 @@ export const Formulario = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const crearContacto = async () => await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`, {
+      method: "POST",
+      body: JSON.stringify(
+        formData
+      ),
+      headers: { "Content-Type": "application/json" }
+    });
+    crearContacto()
     console.log('Formulario enviado:', formData);
     // Aquí iría la lógica para enviar los datos a una API (fetch)
   };
 
   return (
     <form onSubmit={handleSubmit} className="formContainer">
-      <h2>Add a new contact</h2>
+      <h2>Añadir un nuevo contacto</h2>
 
       <div className="formGroup">
-        <label htmlFor="fullName" className="label">Full Name</label>
+        <label htmlFor="name" className="label">Nombre completo</label>
         <input
           type="text"
-          id="fullName"
-          name="fullName"
+          id="name"
+          name="name"
           placeholder="Full Name"
-          value={formData.fullName}
+          value={formData.name}
           onChange={handleChange}
           className="inputField"
           required
@@ -52,7 +66,7 @@ export const Formulario = () => {
       </div>
 
       <div className="formGroup">
-        <label htmlFor="phone" className="label">Phone</label>
+        <label htmlFor="phone" className="label">Teléfono</label>
         <input
           type="tel"
           id="phone"
@@ -65,7 +79,7 @@ export const Formulario = () => {
       </div>
 
       <div className="formGroup">
-        <label htmlFor="address" className="label">Address</label>
+        <label htmlFor="address" className="label">Dirección</label>
         <input
           type="text"
           id="address"
@@ -78,12 +92,12 @@ export const Formulario = () => {
       </div>
 
       <button type="submit" className="saveButton">
-        save
+        Guardar
       </button>
 
-      <a href="#" className="link">or get back to contacts</a>
+      <Link to="/">
+        <span className="navbar-brand mb-0 h1">Volver a Contactos</span>
+      </Link>
     </form>
   );
 };
-
-
