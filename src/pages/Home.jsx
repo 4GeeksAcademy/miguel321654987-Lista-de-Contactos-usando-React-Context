@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 export const Home = () => {
 
     const { store, dispatch } = useGlobalReducer()
+
     const [agenda, setAgenda] = useState([])
     console.log(agenda)
     const slug = "miguel321654987"
@@ -51,14 +52,14 @@ export const Home = () => {
         <div className="me-5">
 
             <div className="m-auto text-end">
-                <Link to="/formulario">
+                <Link to = "/formulario" >
                     <button className="btn btn-primary bg-success">Añadir nuevo contacto</button>
                 </Link>
             </div>
 
             <ul className="list-group">
                 {agenda && agenda.length > 0 ? (
-                    agenda.map((item, index) => (
+                    agenda.map((item, id) => (
                         <li className="list-group-item" key={item.id || index}>
                             <div className="row justify-content-between align-items-center p-2">
                                 <div className="col-2">

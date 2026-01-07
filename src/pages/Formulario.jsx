@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 export const Formulario = () => {
-const {id} = useParams
+  const { id } = useParams()
+  const slug = "miguel321654987"
 
   const [formData, setFormData] = useState({
     name: '',
@@ -10,28 +11,64 @@ const {id} = useParams
     phone: '',
     address: '',
   });
-  const slug = "miguel321654987"
 
-  
-  
+
+  // --- EFECTO PARA CARGAR DATOS SI ESTAMOS EDITANDO ---
+  useEffect(() => {
+    if (id) {
+      // Si hay un ID en la URL, buscamos los datos de ese contacto
+      fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`)
+        .then(response => response.json())
+        .then(data => {
+          // Buscamos el contacto específico dentro del array de la agenda
+          const contactoAEditar = data.contacts.find(c => c.id === Number(id));
+          if (contactoAEditar) {
+            setFormData({
+              name: contactoAEditar.name,
+              email: contactoAEditar.email,
+              phone: contactoAEditar.phone,
+              address: contactoAEditar.address
+            });
+          }
+        })
+        .catch(error => console.error("Error cargando contacto:", error));
+    }
+  }, [id, slug]); // Se ejecuta cuando el ID cambia
+
+
+
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const crearContacto = async () => await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`, {
-      method: "POST",
-      body: JSON.stringify(
-        formData
-      ),
-      headers: { "Content-Type": "application/json" }
-    });
-    crearContacto()
-    console.log('Formulario enviado:', formData);
-    // Aquí iría la lógica para enviar los datos a una API (fetch)
+
+    // Si hay id, la URL debe incluirlo. Si no, es la URL general de contactos.
+    const url = id
+      ? `https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`
+      : `https://playground.4geeks.com/contact/agendas/${slug}/contacts`;
+
+    // Si hay id usamos PUT (editar), si no, POST (crear)
+    const metodo = id ? "PUT" : "POST";
+
+    try {
+      const response = await fetch(url, {
+        method: metodo,
+        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      if (response.ok) {
+        console.log("Éxito:", id ? "Contacto actualizado" : "Contacto creado");
+        // Aquí va el siguiente paso: redirección
+      }
+    } catch (error) {
+      console.error("Error al guardar:", error);
+    }
   };
+
 
   return (
     <form onSubmit={handleSubmit} className="formContainer">
