@@ -7,60 +7,60 @@ export const Home = () => {
 
     const { store, dispatch } = useGlobalReducer()
 
-    const [agenda, setAgenda] = useState([])
-    console.log(agenda)
+    const [contactos, setContactos] = useState([])
+    console.log(contactos)
     const slug = "miguel321654987"
 
     useEffect(() => {
-        // 1. Comoprobar si la agenda existe
-        const inicializarAgenda = async () => await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
-            .then(response => {
-                if (response.status === 404) {
-                    // 2. Si NO existe (404), la CREAMOS. Tras crearla, la agenda estará vacía
-                    fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" }
-                    })
-                    setAgenda([])
-                }
-            });
-        // Si la agenda ya existía, pedimos los contactos
-        fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`)
-            .then(response => response.json())
-            .then(data => {
-                // Seteamos el listado (manejando si viene de la creación o de la consulta)
-                setAgenda(data.contacts || []);
-            })
-            .catch(error => console.error("Error en el proceso:", error));
-
-        inicializarAgenda();
+        // PASO 1: Verificar si la agenda existe
+        const obtenerContactos = async () => {
+            await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
+                .then(response => {
+                    if (response.status === 404) {
+                        // PASO 2: Si no existe, (404), la creamos con un POST. Tras crearla, la agenda nueva estará vacía
+                        fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" }
+                        })
+                    }
+                });
+            // PASO 3: Si existe, pedir los contactos
+            await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`)
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizamos el estado local con los contactos recibidos(manejando si viene de la creación o de la consulta)
+                    setContactos(data.contacts || []);
+                })
+                .catch(error => console.error("Error en el proceso:", error));
+        }
+        obtenerContactos();
 
     }, [slug]);
 
     // Función para eliminar el contacto de la agenda
     const eliminarContacto = async (id) => {
-        // 1. Añadimos el ID a la URL
+        // 1. Añadimos el ID a la URL.  // 1. Borrado en el Servidor (API)
         await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`, {
             method: "DELETE"
         });
-
-        // 2. Metemos el setAgenda DENTRO de las llaves
-        setAgenda(agenda.filter(item => item.id !== id));
+        // 2. Borrado en la Interfaz (DOM)
+        setContactos(contactos.filter(item => item.id !== id));
     };
 
     return (
         <div className="me-5">
 
             <div className="m-auto text-end">
-                <Link to = "/formulario" >
+                <Link to="/formulario" >
                     <button className="btn btn-primary bg-success">Añadir nuevo contacto</button>
                 </Link>
             </div>
 
             <ul className="list-group">
-                {agenda && agenda.length > 0 ? (
-                    agenda.map((item, id) => (
-                        <li className="list-group-item" key={item.id || index}>
+
+                {contactos && contactos.length > 0 ? (
+                    contactos.map((item) => (
+                        <li className="list-group-item" key={item.id}>
                             <div className="row justify-content-between align-items-center p-2">
                                 <div className="col-2">
                                     <img
@@ -69,10 +69,8 @@ export const Home = () => {
                                         className="ImagenContacto rounded-circle img-fluid"
                                     />
                                 </div>
-
                                 <div className="col-8">
                                     <p className="lead mb-1">
-                                        {/* USAMOS 'item' (el contacto actual del bucle) */}
                                         <strong>{item.name}</strong>
                                     </p>
                                     <p className="text-muted mb-1">
@@ -90,7 +88,7 @@ export const Home = () => {
                                 </div>
 
                                 <div className="col-2 text-end">
-                                    <Link to = {`/formulario/${item.id}`} className="btn btn-sm btn-link text-secondary me-2">
+                                    <Link to={`/formulario/${item.id}`} className="btn btn-sm btn-link text-secondary me-2">
                                         <i className="fas fa-pencil-alt"></i>
                                     </Link>
                                     <button className="btn btn-sm btn-link text-danger"
@@ -98,6 +96,7 @@ export const Home = () => {
                                         <i className="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
+                                
                             </div>
                         </li>
                     ))
