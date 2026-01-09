@@ -5,7 +5,7 @@ export const Formulario = () => {
   const { id } = useParams()
   const slug = "miguel321654987"
 
-  const [formData, setFormData] = useState({
+  const [datosContacts, setDatosContacts] = useState({
     name: '',
     email: '',
     phone: '',
@@ -13,7 +13,7 @@ export const Formulario = () => {
   });
 
 
-  // --- EFECTO PARA CARGAR DATOS SI ESTAMOS EDITANDO ---
+  // --- CARGAR DATOS SI ESTAMOS EDITANDO ---
   useEffect(() => {
     if (id) {
       // Si hay un ID en la URL, buscamos los datos de ese contacto
@@ -23,7 +23,7 @@ export const Formulario = () => {
           // Buscamos el contacto específico dentro del array de la agenda
           const contactoAEditar = data.contacts.find(c => c.id === Number(id));
           if (contactoAEditar) {
-            setFormData({
+            setDatosContacts({
               name: contactoAEditar.name,
               email: contactoAEditar.email,
               phone: contactoAEditar.phone,
@@ -36,18 +36,18 @@ export const Formulario = () => {
   }, [id, slug]); // Se ejecuta cuando el ID cambia
 
 
-
-
+  // Actualizar lo que estás escribiendo en el formulario en tiempo real.
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setDatosContacts({ ...datosContacts, [e.target.name]: e.target.value });
   };
 
+  // Guardar el contacto
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Si hay id, la URL debe incluirlo. Si no, es la URL general de contactos.
-    const url = id
-      ? `https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`
+    // Si hay id, la URL debe incluirlo, se edita con Put. Si no, es la URL general de contactos, crea el contacto con Post.
+    const url = id ?
+      `https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`
       : `https://playground.4geeks.com/contact/agendas/${slug}/contacts`;
 
     // Si hay id usamos PUT (editar), si no, POST (crear)
@@ -56,7 +56,7 @@ export const Formulario = () => {
     try {
       const response = await fetch(url, {
         method: metodo,
-        body: JSON.stringify(formData),
+        body: JSON.stringify(datosContacts),
         headers: { "Content-Type": "application/json" }
       });
 
@@ -81,7 +81,7 @@ export const Formulario = () => {
           id="name"
           name="name"
           placeholder="Full Name"
-          value={formData.name}
+          value={datosContacts.name}
           onChange={handleChange}
           className="inputField"
           required
@@ -95,7 +95,7 @@ export const Formulario = () => {
           id="email"
           name="email"
           placeholder="Enter email"
-          value={formData.email}
+          value={datosContacts.email}
           onChange={handleChange}
           className="inputField"
           required
@@ -109,7 +109,7 @@ export const Formulario = () => {
           id="phone"
           name="phone"
           placeholder="Enter phone"
-          value={formData.phone}
+          value={datosContacts.phone}
           onChange={handleChange}
           className="inputField"
         />
@@ -122,7 +122,7 @@ export const Formulario = () => {
           id="address"
           name="address"
           placeholder="Enter address"
-          value={formData.address}
+          value={datosContacts.address}
           onChange={handleChange}
           className="inputField"
         />

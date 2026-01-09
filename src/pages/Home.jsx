@@ -8,32 +8,26 @@ export const Home = () => {
     const { store, dispatch } = useGlobalReducer()
 
     const [contactos, setContactos] = useState([])
-    console.log(contactos)
     const slug = "miguel321654987"
-
-    useEffect(() => {
-        // PASO 1: Verificar si la agenda existe
-        const obtenerContactos = async () => {
-            await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
-                .then(response => {
-                    if (response.status === 404) {
-                        // PASO 2: Si no existe, (404), la creamos con un POST. Tras crearla, la agenda nueva estará vacía
-                        fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" }
-                        })
-                    }
-                });
-            // PASO 3: Si existe, pedir los contactos
-            await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`)
-                .then(response => response.json())
-                .then(data => {
-                    // Actualizamos el estado local con los contactos recibidos(manejando si viene de la creación o de la consulta)
-                    setContactos(data.contacts || []);
-                })
-                .catch(error => console.error("Error en el proceso:", error));
+    const getContacts = async () => {
+        const response = await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
+        if (!response.ok) {
+            createAgenda()
         }
-        obtenerContactos();
+        const data = response.json()
+        setContactos(data.contacts)
+    }
+    console.log(data)
+
+    const createAgenda = async () => {
+        await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        })
+        getContacts()
+    }
+    useEffect(() => {
+        getContacts()
 
     }, [slug]);
 
@@ -96,7 +90,7 @@ export const Home = () => {
                                         <i className="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
-                                
+
                             </div>
                         </li>
                     ))
