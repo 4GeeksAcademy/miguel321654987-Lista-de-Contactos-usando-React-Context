@@ -1,45 +1,87 @@
 import { useEffect } from "react";
 import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
-import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export const Home = () => {
 
     const { store, dispatch } = useGlobalReducer()
 
-    const [contactos, setContactos] = useState([])
     const slug = "miguel321654987"
+
     const getContacts = async () => {
-        const response = await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`)
-        if (!response.ok) {
-            createAgenda()
+        // creamos la función para obtener los contactos, pero no la llamamos, se ejecutará luego en un useEffect 
+        try {
+            const response = await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`);
+
+            if (!response.ok) {
+                // Creamos la agenda y salimos de ESTA ejecución porque createAgenda crea la Agenda y después llamará a getContacts al terminar.
+                await createAgenda();
+                return;
+                // De aquí saltaríamos a donde se define createAgenda
+            }
+            const data = await response.json();
+            dispatch({
+                type: 'set_contacts',
+                payload: data.contacts
+            });
+        } catch (error) {
+            console.error("Error obteniendo contactos:", error);
         }
-        const data = response.json()
-        setContactos(data.contacts)
-    }
-    console.log(data)
+    };
 
     const createAgenda = async () => {
-        await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" }
-        })
-        getContacts()
-    }
+        try {
+            const response = await fetch(`https://playground.4geeks.com/contact/agendas/${slug}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" }
+            });
+            if (response.ok) {
+                await getContacts();
+                /* Ahora sí llamamos y obtenemos los contactos, pero llegamos aquí sólo si no existe la Agenda.
+                Si existe Agenda, leería getContacts y se ejecutaría sólo en el usEffect.
+                Si no existe Agenda, se ejecuta createAgenda en getContacts , y el return sale de la función (y luego getContacts se ejecuta
+                en createAgenda). Luego la creamos pero no la llamamos.
+                Aunque llamemos otra vez a getContacts en useEffect, no genera bucle porque antes se llama subordinada a createAgenda.
+                Si no existe Agenda (y se ejecutaría en useEffect y luego sólo 1 vez para crearla). Primero ejecuta el useEffect, y ponemos [] para 
+                que no Re-ejecute al actualizar contacts.*/
+            } else {
+                console.error("Error en la respuesta del servidor:", response.status);
+            }
+        } catch (error) {
+            console.error("Error al crear agenda:", error);
+        }
+    };
+
+    // Llamamos a getContacts en un useEffect, se ejecutará get si la agenda ya existía inicialmente
     useEffect(() => {
         getContacts()
 
-    }, [slug]);
+    }, []);
 
     // Función para eliminar el contacto de la agenda
     const eliminarContacto = async (id) => {
-        // 1. Añadimos el ID a la URL.  // 1. Borrado en el Servidor (API)
-        await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`, {
-            method: "DELETE"
-        });
-        // 2. Borrado en la Interfaz (DOM)
-        setContactos(contactos.filter(item => item.id !== id));
+        try {
+            // 1. Borrado en el Servidor (API)
+            const response = await fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts/${id}`, {
+                method: "DELETE"
+            });
+
+            if (response.ok) {
+                // 2. Borrado en el Estado Global (Store)
+                // Esto activará el caso 'delete_contact' en tu storeReducer
+                dispatch({
+                    type: 'delete_contact',
+                    payload: id
+                });
+                console.log(`Contacto ${id} eliminado con éxito`);
+            } else {
+                console.error("No se pudo eliminar el contacto del servidor");
+            }
+        } catch (error) {
+            console.error("Error de red al intentar eliminar:", error);
+        }
     };
+
 
     return (
         <div className="me-5">
@@ -52,8 +94,8 @@ export const Home = () => {
 
             <ul className="list-group">
 
-                {contactos && contactos.length > 0 ? (
-                    contactos.map((item) => (
+                {store.contactos && store.contactos.length > 0 ? (
+                    store.contactos.map((item) => (
                         <li className="list-group-item" key={item.id}>
                             <div className="row justify-content-between align-items-center p-2">
                                 <div className="col-2">

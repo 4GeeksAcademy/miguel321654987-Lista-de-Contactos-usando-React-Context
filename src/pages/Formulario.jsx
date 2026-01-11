@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import useGlobalReducer from "../hooks/useGlobalReducer.jsx";
 
 export const Formulario = () => {
   const { id } = useParams()
   const slug = "miguel321654987"
+   const navigate = useNavigate()
+
+  const { store, dispatch } = useGlobalReducer()
 
   const [datosContacts, setDatosContacts] = useState({
     name: '',
@@ -15,25 +19,15 @@ export const Formulario = () => {
 
   // --- CARGAR DATOS SI ESTAMOS EDITANDO ---
   useEffect(() => {
-    if (id) {
-      // Si hay un ID en la URL, buscamos los datos de ese contacto
-      fetch(`https://playground.4geeks.com/contact/agendas/${slug}/contacts`)
-        .then(response => response.json())
-        .then(data => {
-          // Buscamos el contacto específico dentro del array de la agenda
-          const contactoAEditar = data.contacts.find(c => c.id === Number(id));
-          if (contactoAEditar) {
-            setDatosContacts({
-              name: contactoAEditar.name,
-              email: contactoAEditar.email,
-              phone: contactoAEditar.phone,
-              address: contactoAEditar.address
-            });
-          }
-        })
-        .catch(error => console.error("Error cargando contacto:", error));
+    // OPTIMIZACIÓN 2026: En lugar de hacer otro fetch, 
+    // buscamos primero en el store global que ya tenemos.
+    if (id && store.contactos.length > 0) {
+      const contactoAEditar = store.contactos.find(contacto => contacto.id === Number(id));
+      if (contactoAEditar) {
+        setDatosContacts(contactoAEditar);
+      }
     }
-  }, [id, slug]); // Se ejecuta cuando el ID cambia
+  }, [id, store.contactos]);
 
 
   // Actualizar lo que estás escribiendo en el formulario en tiempo real.
@@ -53,7 +47,7 @@ export const Formulario = () => {
     // Si hay id usamos PUT (editar), si no, POST (crear)
     const metodo = id ? "PUT" : "POST";
 
-    try {
+      try {
       const response = await fetch(url, {
         method: metodo,
         body: JSON.stringify(datosContacts),
@@ -61,13 +55,32 @@ export const Formulario = () => {
       });
 
       if (response.ok) {
-        console.log("Éxito:", id ? "Contacto actualizado" : "Contacto creado");
-        // Aquí va el siguiente paso: redirección
+        const data = await response.json();
+        
+        // --- CONEXIÓN CON EL GLOBAL REDUCER ---
+        if (id) {
+          // Si editamos, actualizamos el contacto específico en el store
+          dispatch({ type: 'update_contact', payload: data });
+        } else {
+          // Si creamos, añadimos el nuevo contacto al store
+          dispatch({ type: 'add_contact', payload: data });
+        }
+         // Reseteas el useState local a blanco
+        setDatosContacts({
+            name: '',
+            email: '',
+            phone: '',
+            address: ''
+        });
+
+        // --- REDIRECCIÓN ---
+        navigate("/"); 
       }
     } catch (error) {
       console.error("Error al guardar:", error);
     }
   };
+
 
 
   return (
