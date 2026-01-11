@@ -43,7 +43,7 @@ export const Home = () => {
                 getContacts se ejecuta en createAgenda). Luego la creamos pero no la llamamos.
                 Aunque llamemos otra vez a getContacts en useEffect, no genera bucle porque antes se llama subordinada a createAgenda.
                 Si no existe Agenda (y se ejecutaría en useEffect y luego sólo 1 vez para crearla). Primero ejecuta el useEffect, y ponemos [] para 
-                que no Re-ejecute al actualizar contacts.*/
+                que no Re-ejecute al actualizar contacts. Se actualiza con useContext.*/
             } else {
                 console.error("Error en la respuesta del servidor:", response.status);
             }
