@@ -39,8 +39,8 @@ export const Home = () => {
                 await getContacts();
                 /* Ahora sí llamamos y obtenemos los contactos, pero llegamos aquí sólo si no existe la Agenda.
                 Si existe Agenda, leería getContacts y se ejecutaría sólo en el usEffect.
-                Si no existe Agenda, se ejecuta createAgenda en getContacts , y el return sale de la función (y luego getContacts se ejecuta
-                en createAgenda). Luego la creamos pero no la llamamos.
+                Si no existe Agenda, se ejecuta createAgenda en getContacts , y el return sale de la función (y crea la agenda y
+                getContacts se ejecuta en createAgenda). Luego la creamos pero no la llamamos.
                 Aunque llamemos otra vez a getContacts en useEffect, no genera bucle porque antes se llama subordinada a createAgenda.
                 Si no existe Agenda (y se ejecutaría en useEffect y luego sólo 1 vez para crearla). Primero ejecuta el useEffect, y ponemos [] para 
                 que no Re-ejecute al actualizar contacts.*/
