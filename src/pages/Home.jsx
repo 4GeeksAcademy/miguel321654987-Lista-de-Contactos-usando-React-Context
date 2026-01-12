@@ -38,11 +38,11 @@ export const Home = () => {
             if (response.ok) {
                 await getContacts();
                 /* Ahora sí llamamos y obtenemos los contactos, pero llegamos aquí sólo si no existe la Agenda.
-                Si existe Agenda, leería getContacts y se ejecutaría sólo en el usEffect.
-                Si no existe Agenda, se ejecuta createAgenda en getContacts , y el return sale de la función (y crea la agenda y
-                getContacts se ejecuta en createAgenda). Luego la creamos pero no la llamamos.
-                Aunque llamemos otra vez a getContacts en useEffect, no genera bucle porque antes se llama subordinada a createAgenda.
-                Si no existe Agenda (y se ejecutaría en useEffect y luego sólo 1 vez para crearla). Primero ejecuta el useEffect, y ponemos [] para 
+                Si existe Agenda, leería getContacts y lo ejecutaría sólo en el usEffect.
+                Si no existe Agenda, se ejecuta createAgenda en getContacts , y el return sale de la función. 
+                Luego está creada getAgenda pero no la llamamos, y getContacts se ejecuta dentro de createAgenda.
+                Aunque llamemos otra vez a getContacts en useEffect, no genera bucle porque antes la llamamos subordinada a createAgenda.
+                Si no existe Agenda se ejecutaría en useEffect y luego sólo 1 vez para crearla. Primero ejecuta el useEffect, y ponemos [] para 
                 que no Re-ejecute al actualizar contacts. Se actualiza con useContext.*/
             } else {
                 console.error("Error en la respuesta del servidor:", response.status);
@@ -54,6 +54,7 @@ export const Home = () => {
 
     // Llamamos a getContacts en un useEffect, se ejecutará get si la agenda ya existía inicialmente
     useEffect(() => {
+
         getContacts()
 
     }, []);
@@ -68,7 +69,7 @@ export const Home = () => {
 
             if (response.ok) {
                 // 2. Borrado en el Estado Global (Store)
-                // Esto activará el caso 'delete_contact' en tu storeReducer
+                // Esto activará el caso 'delete_contact' en storeReducer
                 dispatch({
                     type: 'delete_contact',
                     payload: id

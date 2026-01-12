@@ -1,5 +1,5 @@
-export const initialStore=()=>{
-  return{
+export const initialStore = () => {
+  return {
     message: null,
     todos: [
       {
@@ -13,13 +13,13 @@ export const initialStore=()=>{
         background: null,
       }
     ],
-    contactos:[]
+    contactos: []
   }
 }
 
 export default function storeReducer(store, action = {}) {
-  switch(action.type){
-     case 'set_contacts':
+  switch (action.type) {
+    case 'set_contacts':
       // Guarda la lista completa que viene de la API
       return {
         ...store,
@@ -37,9 +37,7 @@ export default function storeReducer(store, action = {}) {
       // Busca el contacto por ID y lo reemplaza con los nuevos datos
       return {
         ...store,
-        contactos: store.contactos.map(contacto =>
-          contacto.id === action.payload.id ? action.payload : contacto
-        )
+        contactos: store.contactos.map(contacto => contacto.id === action.payload.id ? action.payload : contacto)
       };
 
     case 'delete_contact':
@@ -51,7 +49,7 @@ export default function storeReducer(store, action = {}) {
 
     case 'add_task':
 
-      const { id,  color } = action.payload
+      const { id, color } = action.payload
 
       return {
         ...store,
@@ -59,5 +57,5 @@ export default function storeReducer(store, action = {}) {
       };
     default:
       throw Error('Unknown action.');
-  }    
+  }
 }

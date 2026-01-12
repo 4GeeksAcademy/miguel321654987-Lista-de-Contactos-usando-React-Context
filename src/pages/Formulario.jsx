@@ -16,7 +16,6 @@ export const Formulario = () => {
     address: '',
   });
 
-
   // --- CARGAR DATOS SI ESTAMOS EDITANDO ---
   useEffect(() => {
     // OPTIMIZACIÓN 2026: En lugar de hacer otro fetch, 
@@ -28,7 +27,6 @@ export const Formulario = () => {
       }
     }
   }, [id, store.contactos]);
-
 
   // Actualizar lo que estás escribiendo en el formulario en tiempo real.
   const handleChange = (e) => {
@@ -65,7 +63,7 @@ export const Formulario = () => {
           // Si creamos, añadimos el nuevo contacto al store
           dispatch({ type: 'add_contact', payload: data });
         }
-         // Reseteas el useState local a blanco
+         // Resetea el useState local a blanco
         setDatosContacts({
             name: '',
             email: '',
